@@ -1,0 +1,23 @@
+name: fork-test
+on:
+  push:
+    branches: ['ci-run/**']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: ./.github/actions/prepare-install
+        with:
+          node-version: 24
+      - run: pnpm exec nx build eslint-plugin --skip-nx-cache
+      - run: cd packages/eslint-plugin && pnpm exec vitest run tests/rules/no-unnecessary-type-assertion.test.ts
+      - run: cd packages/eslint-plugin && pnpm exec eslint src/rules/no-unnecessary-type-assertion.ts tests/rules/no-unnecessary-type-assertion.test.ts
+      - run: pnpm exec prettier --check packages/eslint-plugin/src/rules/no-unnecessary-type-assertion.ts packages/eslint-plugin/tests/rules/no-unnecessary-type-assertion.test.ts
+      - name: tests must fail without the fix
+        run: |
+          git checkout origin/main -- packages/eslint-plugin/src/rules/no-unnecessary-type-assertion.ts || git checkout HEAD~1 -- packages/eslint-plugin/src/rules/no-unnecessary-type-assertion.ts
+          cd packages/eslint-plugin && ! pnpm exec vitest run tests/rules/no-unnecessary-type-assertion.test.ts
