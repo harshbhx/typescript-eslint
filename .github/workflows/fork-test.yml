@@ -15,7 +15,7 @@ jobs:
           node-version: 24
       - run: pnpm exec nx build eslint-plugin --skip-nx-cache
       - run: cd packages/eslint-plugin && pnpm exec vitest run tests/rules/no-unnecessary-type-assertion.test.ts
-      - run: cd packages/eslint-plugin && pnpm exec eslint src/rules/no-unnecessary-type-assertion.ts tests/rules/no-unnecessary-type-assertion.test.ts
+      - run: cd packages/eslint-plugin && pnpm exec tsc -p tsconfig.json --noEmit
       - run: pnpm exec prettier --check packages/eslint-plugin/src/rules/no-unnecessary-type-assertion.ts packages/eslint-plugin/tests/rules/no-unnecessary-type-assertion.test.ts
       - name: tests must fail without the fix
         run: |
